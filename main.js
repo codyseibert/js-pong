@@ -2,26 +2,42 @@ const $pong = $('#pong');
 const $playerPadel = $('#player-padel');
 const $aiPadel = $('#ai-padel');
 const $ball = $('#ball');
+const $restart = $('#restart');
 
 const UP_LEFT = -3 * Math.PI / 4;
 const UP_RIGHT = - Math.PI / 4;
 const DOWN_LEFT = 3 * Math.PI / 4;
 const DOWN_RIGHT = Math.PI / 4;
 
-const aiPadel = {
-  direction: 1,
-  SPEED: 3,
-  top: 0
-}
+let interval = null;
+let aiPadel = null;
+let ball = null;
 
-const ball = {
-  top: 240,
-  left: 460,
-  angle: UP_RIGHT,
-  speed: 1.5
+$restart.click(function() {
+  init();
+})
+
+function init () {
+  aiPadel = {
+    direction: 1,
+    SPEED: 1,
+    top: 0
+  }
+
+  ball = {
+    top: 240,
+    left: 460,
+    angle: UP_LEFT,
+    speed: 5
+  }
+
+  interval = setInterval(update, 20);
 }
 
 $pong.mousemove(function (evt) {
+  if (!interval) {
+    return;
+  }
   const top = Math.min(
     $pong.height() - $playerPadel.height(),
     evt.pageY - $pong.offset().top
@@ -75,6 +91,17 @@ function updateBall () {
       ball.angle = UP_LEFT;
     }
   }
+
+  const winner = getWinner();
+  if (winner) {
+    endGame(winner);
+  }
+}
+
+function endGame(winner) {
+  clearInterval(interval);
+  interval = null;
+  alert(`${winner} has won the game!`);
 }
 
 function isBallOverlappingWithPlayerPadel () {
@@ -109,4 +136,14 @@ function updateAiPadel () {
   });
 }
 
-setInterval(update, 20);
+function getWinner () {
+  if (ball.left < 0){
+    return 'red';
+  } else if (ball.left > $pong.width() - $ball.width()) {
+    return 'blue';
+  } else {
+    return false;
+  }
+}
+
+init();
